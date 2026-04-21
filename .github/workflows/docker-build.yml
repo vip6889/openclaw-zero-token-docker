@@ -14,13 +14,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       - name: Verify Node.js version
         run: |
-          node -v
-          npm -v
-          pnpm -v
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "PNPM version: $(pnpm -v)"
+          echo "PATH: $PATH"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.13.0'
+          cache: 'npm'
+          
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
