@@ -8,12 +8,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # 关键：强制使用Node.js 24
+    # 强制使用Node.js 24
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Verify Node.js version
+        run: |
+          node -v
+          npm -v
+          pnpm -v
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
