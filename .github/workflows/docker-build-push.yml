@@ -1,13 +1,14 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Image (Dev Mode)
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch: # 允许在 GitHub 网页手动触发
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/openclaw-zero-token
+  # 请修改为您的 Docker Hub 用户名和仓库名
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/openclaw-zero-token-dev
 
 jobs:
   build-and-push:
@@ -15,12 +16,12 @@ jobs:
     permissions:
       contents: read
       packages: write
-    # 设置使用Node.js 24，避免弃用警告
+    # 明确设置环境，让 Actions 在 Node.js 24 上运行，避免警告
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
@@ -32,23 +33,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # 可选：启用更详细的构建日志
+          provenance: false
