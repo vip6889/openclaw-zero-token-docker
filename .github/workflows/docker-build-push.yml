@@ -2,12 +2,12 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ] # 仅在推送到main分支时触发
-  workflow_dispatch: # 允许手动触发
+    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/openclaw-zero-token # 请替换为您的Docker Hub仓库名
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/openclaw-zero-token
 
 jobs:
   build-and-push:
@@ -15,6 +15,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    # 设置使用Node.js 24，避免弃用警告
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -29,7 +32,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
